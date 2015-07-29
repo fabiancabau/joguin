@@ -14,13 +14,17 @@
 		'walk_up': [11,12,13,14,15,16,17]
 	};
 
-	Character = function(game, unique_id, x, y, sprite, controlSchema) {
+	Character = function(game, unique_id, x, y, sprite) {
 		Phaser.Sprite.call(this, game, x, y, sprite);
 
-		this.controlSchema = controlSchema;	
-		this.unique_id = unique_id;
+		this.playergroup = game.add.group();
 
+		this.unique_id = unique_id;
 		this.walking_direction = 'stop';
+		this.hp = 20;
+		this.totalhp = 20;
+		this._lasthp = 0;
+
 
 		game.add.existing(this);
 		game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -33,6 +37,9 @@
 		this.animations.add('walk_left', characterAnimations.walk_left);
 
 		this.frame = 11;
+
+		this.healthbar = new Healthbar(this);
+		
 		
 	}
 
@@ -192,8 +199,60 @@
 		else if (this.walking_direction == 'down') {
 			this.animations.play('walk_down', 30, true);
 		}
+		else {
+			this.animations.stop();
+		}
+
+		if (this._lasthp !== this.hp) {
+    		this.healthbar.clear();
+			var x = (this.hp / this.totalhp) * 100;
+
+			var colour = rgbToHex((x > 50 ? 1-2*(x-50)/100.0 : 1.0) * 255, (x > 50 ? 1.0 : 2*x/100.0) * 255, 0);
+
+			this.healthbar.beginFill(colour);
+		    this.healthbar.lineStyle(5, colour, 1);
+		    this.healthbar.moveTo(0,-5);
+		    this.healthbar.lineTo(7 * this.hp, -5);
+		    this.healthbar.endFill();
+		}
+
+		this.healthbar.y = this.y;
+		this.healthbar.x = this.x;
 
 	}
+
+	function rgbToHex(r, g, b) {
+    	return "0x" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+	}
+
+
+	var Healthbar = function(){
+		this.bar = game.add.graphics(0,0);
+	};
+
+	Healthbar.prototype.draw = function(character) {
+
+		if (character._lasthp !== character.hp) {
+			this.bar.clear();
+			var x = (character.hp / character.totalhp) * 100;
+
+			var colour = this.rgbToHex((x > 50 ? 1-2*(x-50)/100.0 : 1.0) * 255, (x > 50 ? 1.0 : 2*x/100.0) * 255, 0);
+
+			this.bar.beginFill(colour);
+		    this.bar.lineStyle(5, colour, 1);
+		    this.bar.moveTo(0,-5);
+		    this.bar.lineTo(7 * character.hp, -5);
+		    this.bar.endFill();
+
+		    this.bar.x = character.x;
+		    this.bar.y = character.y;
+		}
+	};
+
+	Healthbar.prototype.rgbToHex = function(r, g, b) {
+		return "0x" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+	};
+
 
 
 	Enemy = function(game, unique_id, x, y, sprite) {
@@ -201,9 +260,12 @@
 
 		this.unique_id = unique_id;
 
-
 		game.add.existing(this);
 		game.physics.enable(this, Phaser.Physics.ARCADE);
+
+		this.hp = 20;
+		this.totalhp = 20;
+		this._lasthp = 0;
 
 		this.body.collideWorldBounds = true;
 
@@ -212,6 +274,7 @@
 		this.animations.add('walk_right', enemyAnimations.walk_right);
 		this.animations.add('walk_left', enemyAnimations.walk_left);
 
+		this.healthbar = new Healthbar();
 
 		this.frame = 0;
 		
@@ -234,6 +297,8 @@
 		else {
 			this.animations.stop();
 		}
+
+		this.healthbar.draw(this);
 
 	} 
 
@@ -261,8 +326,8 @@
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 		game.stage.backgroundColor = '#E8E8E8';
 
-		character = new Character(game, 'ABC1234', 500, 430, 'character', 2);
-		enemy = new Enemy(game, '111222', 500, 10, 'enemy');
+		character = new Character(game, 'ABC1234', 500, 430, 'character');
+		enemy = new Enemy(game, '111222', 500, 20, 'enemy');
 
 		arrow_left = game.add.button(game.world.centerX - 500, 400, 'arrow_left', character.walkLeft, character, 2, 1, 0);
 		arrow_right = game.add.button(game.world.centerX + 380, 400, 'arrow_right', character.walkRight, character, 2, 1, 0);
