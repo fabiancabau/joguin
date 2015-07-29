@@ -32,8 +32,7 @@
 		this.animations.add('walk_right', characterAnimations.walk_right);
 		this.animations.add('walk_left', characterAnimations.walk_left);
 
-
-		this.frame = 12;
+		this.frame = 11;
 		
 	}
 
@@ -127,72 +126,59 @@
 	}
 
 
+	Character.prototype.attackEnemy = function() {
+
+		// POR ALGUM MOTIVO O CONTEXTO DESAPARECE SE NAO FIZER ISSO
+		var context = this;
+		initial_y = this.y;
+		
+		//Seta a direção para cima
+		context.walking_direction = 'up';
+
+		console.log('This no começo do metodo walkLeft');
+		console.log(this);
+		
+		//Cria o tween de movimentar para cima
+		characterWalksUp = game.add.tween(context);
+
+		//Chama o método .to passando o y desejado (negativo, pois vai andar para cima)
+		characterWalksUp.to( { y: enemy.y + enemy.height }, 900, Phaser.Easing.Linear.None, true);
+		//characterWalksUp.yoyo(true, 500);
+
+		//Ao completar a animação para cima
+		characterWalksUp.onComplete.add(function(){
+
+			var text = createText(enemy.x + 130, enemy.y + 60, '300');
+    		text.setShadow(1, 1, 'rgba(0,0,0,0.5)', 3);
+
+			//Muda a direção do boneco
+			context.walking_direction = 'down';
+
+			//Cria um novo tween
+			characterWalksLeft = game.add.tween(context);
+
+			//Cria a animação para movimentar para a direita
+			characterWalksLeft.to( { y: initial_y }, 2000, Phaser.Easing.Linear.None, true);
+
+			//Ao completar a animação
+			characterWalksLeft.onComplete.add(function(){
+
+				//Para o boneco
+				context.walking_direction = 'stop';
+				
+				context.animations.stop();
+				context.frame = 11;
+
+				//Lixo do cacete
+				console.log('This no fim do método walkRight');
+				console.log(this);
+			});
+		});
+
+	}
+
+
 	Character.prototype.update = function() {
-
-		// if (this.controlSchema == 1) {
-		// 	if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT))
-		//     {
-		//     	this.animations.play('walk_left', 30, true);
-		//     	this.body.velocity.y = 0;
-		//         this.body.velocity.x = -150;
-		//     }
-		//     else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
-		//     {
-		//     	this.animations.play('walk_right', 30, true);
-		//     	this.body.velocity.y = 0;
-		//         this.body.velocity.x = 150;
-		//     }
-		//     else if (game.input.keyboard.isDown(Phaser.Keyboard.UP))
-		//     {
-		//     	this.animations.play('walk_up', 30, true);
-		//     	this.body.velocity.x = 0;
-		//         this.body.velocity.y = -150;
-		//     }
-		//     else if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN))
-		//     {
-		//     	this.animations.play('walk_down', 30, true);
-		//     	this.body.velocity.x = 0;
-		//         this.body.velocity.y = 150;
-		//     }
-		//     else {
-		//     	this.animations.stop();
-		//     	this.body.velocity.x = 0;
-		//     	this.body.velocity.y = 0;
-		//     }
-		// }
-		// else if (this.controlSchema == 2) {
-		// 	if (game.input.keyboard.isDown(Phaser.Keyboard.A))
-		//     {
-		//     	this.animations.play('walk_left', 30, true);
-		//     	this.body.velocity.y = 0;
-		//         this.body.velocity.x = -150;
-		//     }
-		//     else if (game.input.keyboard.isDown(Phaser.Keyboard.D))
-		//     {
-		//     	this.animations.play('walk_right', 30, true);
-		//     	this.body.velocity.y = 0;
-		//         this.body.velocity.x = 150;
-		//     }
-		//     else if (game.input.keyboard.isDown(Phaser.Keyboard.W))
-		//     {
-		//     	this.animations.play('walk_up', 30, true);
-		//     	this.body.velocity.x = 0;
-		//         this.body.velocity.y = -150;
-		//     }
-		//     else if (game.input.keyboard.isDown(Phaser.Keyboard.S))
-		//     {
-		//     	this.animations.play('walk_down', 30, true);
-		//     	this.body.velocity.x = 0;
-		//         this.body.velocity.y = 150;
-		//     }
-		//     else {
-		//     	this.animations.stop();
-		//     	this.body.velocity.x = 0;
-		//     	this.body.velocity.y = 0;
-		//     }
-		// }
-
-
 
 		if (this.walking_direction == 'left') {
 			this.animations.play('walk_left', 30, true);
@@ -203,8 +189,8 @@
 		else if (this.walking_direction == 'right') {
 			this.animations.play('walk_right', 30, true);
 		}
-		else {
-			this.animations.stop();
+		else if (this.walking_direction == 'down') {
+			this.animations.play('walk_down', 30, true);
 		}
 
 	}
@@ -263,67 +249,35 @@
 		game.load.image('arrow_left', 'arrow_left.png');
 		game.load.image('arrow_right', 'arrow_right.png');
 
+		game.load.image('attack', 'attack.png');
+
 	}
 
 	var character;
-	var character2;
+	var enemy;
+	var text;
 
 	function create() {
 		game.physics.startSystem(Phaser.Physics.ARCADE);
-		game.stage.backgroundColor = '#FFFAAA';
-		//character = new Character(game, 'ABC123', 300, 200, 'character', 1);
-		character2 = new Character(game, 'ABC1234', 500, 430, 'character', 2);
+		game.stage.backgroundColor = '#E8E8E8';
+
+		character = new Character(game, 'ABC1234', 500, 430, 'character', 2);
 		enemy = new Enemy(game, '111222', 500, 10, 'enemy');
 
-		arrow_left = game.add.button(game.world.centerX - 500, 400, 'arrow_left', character2.walkLeft, character2, 2, 1, 0);
-		arrow_right = game.add.button(game.world.centerX + 380, 400, 'arrow_right', character2.walkRight, character2, 2, 1, 0);
+		arrow_left = game.add.button(game.world.centerX - 500, 400, 'arrow_left', character.walkLeft, character, 2, 1, 0);
+		arrow_right = game.add.button(game.world.centerX + 380, 400, 'arrow_right', character.walkRight, character, 2, 1, 0);
+
+		attack_button = game.add.button(game.world.centerX - 200, 500, 'attack', character.attackEnemy, character, 2, 1, 0);
+
     	arrow_left.input.useHandCursor = true;
     	arrow_right.input.useHandCursor = true;
 		
 	}
 
 	function update () {
-		//game.physics.arcade.collide(character, character2, collisionHandler, null, this);
+		//game.physics.arcade.collide(character, character, collisionHandler, null, this);
 	}
 
-
-	// function walkLeft() {
-	// 	character2.walking_direction = 'up';
-		
-	// 	characterWalksUp = game.add.tween(character2);
-	// 	characterWalksLeft = game.add.tween(character2);
-
-	// 	characterWalksUp.to( { y: character2.y - 200 }, 1400, Phaser.Easing.Linear.None, true);
-	// 	characterWalksUp.onComplete.add(function(){
-	// 		character2.walking_direction = 'left';
-	// 		characterWalksLeft.to( { x: character2.x - 460 }, 2000, Phaser.Easing.Linear.None, true);
-	// 	});
-
-	// 	characterWalksLeft.onComplete.add(function(){
-	// 		character2.walking_direction = 'stop';
-	// 		console.log('parou 2');
-	// 	});
-	// }
-
-	// function walkRight() {
-	// 	character2.walking_direction = 'up';
-		
-	// 	characterWalksUp = game.add.tween(character2);
-	// 	characterWalksLeft = game.add.tween(character2);
-
-	// 	console.log(character2);
-
-	// 	characterWalksUp.to( { y: character2.y - 200 }, 1400, Phaser.Easing.Linear.None, true);
-	// 	characterWalksUp.onComplete.add(function(){
-	// 		character2.walking_direction = 'right';
-	// 		characterWalksLeft.to( { x: character2.x + 460 }, 2000, Phaser.Easing.Linear.None, true);
-	// 	});
-
-	// 	characterWalksLeft.onComplete.add(function(){
-	// 		character2.walking_direction = 'stop';
-	// 		console.log('parou 2');
-	// 	});
-	// }
 
 	function collisionHandler (obj1, obj2) {
     	//  The two sprites are colliding
@@ -332,6 +286,28 @@
 
 	function render () {
 		game.debug.text(game.time.fps || '--', 2, 14, "#00ff00");
+	}
+
+	function createText(x, y, text) {
+
+	    var text = game.add.text(x, y, text);
+	    text.alpha = 0;
+	    text.anchor.set(0.5);
+	    text.align = 'center';
+
+	    //	Font style
+	    text.font = 'Arial Black';
+	    text.fontSize = 22;
+	    text.fontWeight = '';
+	    text.fill = '#E60039';
+
+	    var text_tween = game.add.tween(text).to( { alpha: 1 }, 2000, Phaser.Easing.Linear.None, true, 0, 0, false);
+	    text_tween.onComplete.add(function(){
+	    	console.log(text);
+	    	text.destroy();
+	    });
+	    return text;
+
 	}
 
 
