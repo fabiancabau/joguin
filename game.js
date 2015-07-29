@@ -203,21 +203,7 @@
 			this.animations.stop();
 		}
 
-		if (this._lasthp !== this.hp) {
-    		this.healthbar.clear();
-			var x = (this.hp / this.totalhp) * 100;
-
-			var colour = rgbToHex((x > 50 ? 1-2*(x-50)/100.0 : 1.0) * 255, (x > 50 ? 1.0 : 2*x/100.0) * 255, 0);
-
-			this.healthbar.beginFill(colour);
-		    this.healthbar.lineStyle(5, colour, 1);
-		    this.healthbar.moveTo(0,-5);
-		    this.healthbar.lineTo(7 * this.hp, -5);
-		    this.healthbar.endFill();
-		}
-
-		this.healthbar.y = this.y;
-		this.healthbar.x = this.x;
+		this.healthbar.draw(this);
 
 	}
 
