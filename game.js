@@ -19,12 +19,14 @@
 
 		this.playergroup = game.add.group();
 
+		this.max_damage = 3;
+		this.min_damage = 1;
+
 		this.unique_id = unique_id;
 		this.walking_direction = 'stop';
 		this.hp = 20;
 		this.totalhp = 20;
 		this._lasthp = 0;
-
 
 		game.add.existing(this);
 		game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -39,51 +41,32 @@
 		this.frame = 11;
 
 		this.healthbar = new Healthbar(this);
-		
-		
 	}
 
 	Character.prototype = Object.create(Phaser.Sprite.prototype);
 	Character.prototype.constructor = Character;
 
-	Character.prototype.walkLeft = function() {
+	Character.prototype.getAttackDamage = function() {
+  		return Math.floor(Math.random() * (this.max_damage - this.min_damage + 1)) + this.min_damage;
+	}
 
-		// POR ALGUM MOTIVO O CONTEXTO DESAPARECE SE NAO FIZER ISSO
+	Character.prototype.walkLeft = function() {
 		var context = this;
 
-		//Seta a direção para cima
 		context.walking_direction = 'up';
 
-		console.log('This no começo do metodo walkLeft');
-		console.log(this);
-		
-		//Cria o tween de movimentar para cima
 		characterWalksUp = game.add.tween(context);
-
-		//Chama o método .to passando o y desejado (negativo, pois vai andar para cima)
 		characterWalksUp.to( { y: context.y - 200 }, 1400, Phaser.Easing.Linear.None, true);
 
-		//Ao completar a animação para cima
 		characterWalksUp.onComplete.add(function(){
 
-			//Muda a direção do boneco
 			context.walking_direction = 'left';
 
-			//Cria um novo tween
 			characterWalksLeft = game.add.tween(context);
-
-			//Cria a animação para movimentar para a esquerda
 			characterWalksLeft.to( { x: context.x - 460 }, 2000, Phaser.Easing.Linear.None, true);
 
-			//Ao completar a animação
 			characterWalksLeft.onComplete.add(function(){
-
-				//Para o boneco
 				context.walking_direction = 'stop';
-
-				//Lixo do cacete
-				console.log('This no fim do método walkLeft');
-				console.log(this);
 			});
 		});
 
@@ -155,7 +138,10 @@
 		//Ao completar a animação para cima
 		characterWalksUp.onComplete.add(function(){
 
-			var text = createText(enemy.x + 130, enemy.y + 60, '300');
+			var dmg = context.getAttackDamage();
+			enemy.hp = enemy.hp - dmg;
+
+			var text = createText(enemy.x + 130, enemy.y + 60, dmg);
     		text.setShadow(1, 1, 'rgba(0,0,0,0.5)', 3);
 
 			//Muda a direção do boneco
