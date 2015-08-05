@@ -58,7 +58,7 @@
 
 	// }
 
-	var game = new Phaser.Game(700, 560, Phaser.AUTO, 'phaser-example', {preload: preload, create: create, update: update, render: render });
+	var game = new Phaser.Game(1100, 560, Phaser.AUTO, 'phaser-example', {preload: preload, create: create, update: update, render: render });
 
 	function preload() {
 		game.stage.disableVisibilityChange = true;
@@ -89,19 +89,19 @@
 
 		map.setCollision(44, true, 'platform');
 		backgroundlayer.resizeWorld();
-		game.physics.arcade.gravity.y = 300;
 
 		player = game.add.sprite(50, 32, 'dude'); //50 x 32 = starting position
 		game.physics.enable(player, Phaser.Physics.ARCADE);
 
-		player.body.bounce.y = 0.0;
-		player.body.gravity.y = 20;
+		player.body.gravity.y = 1000;
 
 		player.body.collideWorldBounds = true;
 		player.body.setSize(50, 32, 0, 0);
 
 		player.anchor.setTo(.5, 1); //so it flips around its middle
 		player.animations.add('move', [5, 6, 7, 8], 10, true);
+
+		game.camera.follow(player);
 
 		cursors = game.input.keyboard.createCursorKeys();
 		jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -131,8 +131,7 @@
 
 		if (cursors.up.isDown || jumpButton.isDown) {
 			if (player.body.onFloor()) {
-				console.log('pula ae filho da puta');
-				player.body.velocity.y = -250;
+				player.body.velocity.y = -650;
 			}
 		}
 
