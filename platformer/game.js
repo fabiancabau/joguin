@@ -78,6 +78,10 @@
 	var jumpButton;
 
 	function create() {
+		game.time.advancedTiming = true;
+
+		game.scale.pageAlignVertically = true;
+		game.scale.refresh();
 
 		map = game.add.tilemap('tilemap');
 		map.addTilesetImage('tileset_forTiled', 'tiles');
@@ -93,7 +97,7 @@
 		player = game.add.sprite(50, 32, 'dude'); //50 x 32 = starting position
 		game.physics.enable(player, Phaser.Physics.ARCADE);
 
-		player.body.gravity.y = 1000;
+		player.body.gravity.y = 1400;
 
 		player.body.collideWorldBounds = true;
 		player.body.setSize(50, 32, 0, 0);
